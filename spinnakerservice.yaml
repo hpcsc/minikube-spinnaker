@@ -1,0 +1,104 @@
+apiVersion: spinnaker.io/v1alpha2
+kind: SpinnakerService
+metadata:
+  name: spinnaker
+  namespace: spinnaker
+spec:
+  # spec.spinnakerConfig - This section is how to specify configuration spinnaker
+  spinnakerConfig:
+    # spec.spinnakerConfig.config - This section contains the contents of a deployment found in a halconfig .deploymentConfigurations[0]
+    config:
+      version: 1.24.6   # the version of Spinnaker to be deployed
+      features:
+        artifacts: true
+      persistentStorage:
+        persistentStoreType: s3
+        s3:
+          bucket: spinnaker
+          rootFolder: front50
+          endpoint: http://minio:9000
+          accessKeyId: minioadmin
+          secretAccessKey: minioadmin
+          pathStyleAccess: true
+      artifacts:
+        gitrepo:
+          enabled: true
+          accounts:
+          - name: github
+            token: placeholder-githhub-token
+      providers:
+        kubernetes:
+          enabled: true
+          accounts:
+          - name: local-kubernetes
+            kubeconfigFile: local-kubernetes
+            context: minikube
+            providerVersion: V2
+          primaryAccount: local-kubernetes
+
+    # spec.spinnakerConfig.profiles - This section contains the YAML of each service's profile
+    profiles:
+      clouddriver: {} # is the contents of ~/.hal/default/profiles/clouddriver.yml
+      # deck has a special key "settings-local.js" for the contents of settings-local.js
+      deck:
+        # settings-local.js - contents of ~/.hal/default/profiles/settings-local.js
+        # Use the | YAML symbol to indicate a block-style multiline string
+        settings-local.js: |
+          window.spinnakerSettings.feature.kustomizeEnabled = true;
+      echo: {}    # is the contents of ~/.hal/default/profiles/echo.yml
+      fiat: {}    # is the contents of ~/.hal/default/profiles/fiat.yml
+      front50: # is the contents of ~/.hal/default/profiles/front50.yml
+        front50.yml: |
+          spinnaker.s3.versioning: false
+      gate: {}    # is the contents of ~/.hal/default/profiles/gate.yml
+      igor: {}    # is the contents of ~/.hal/default/profiles/igor.yml
+      kayenta: {} # is the contents of ~/.hal/default/profiles/kayenta.yml
+      orca: {}    # is the contents of ~/.hal/default/profiles/orca.yml
+      rosco: {}   # is the contents of ~/.hal/default/profiles/rosco.yml
+
+    # spec.spinnakerConfig.service-settings - This section contains the YAML of the service's service-setting
+    # see https://www.spinnaker.io/reference/halyard/custom/#tweakable-service-settings for available settings
+    service-settings:
+      clouddriver: {}
+      deck:
+        host: 0.0.0.0
+        overrideBaseUrl: http://minikube-ip:32070
+        env:
+          API_HOST: http://minikube-ip:32064
+      echo: {}
+      fiat: {}
+      front50: {}
+      gate:
+        host: 0.0.0.0
+        overrideBaseUrl: http://minikube-ip:32064
+      igor: {}
+      kayenta: {}
+      orca: {}
+      rosco: {}
+    files:
+      local-kubernetes: {}
+  # spec.expose - This section defines how Spinnaker should be publicly exposed
+  expose:
+    type: service  # Kubernetes LoadBalancer type (service/ingress), note: only "service" is supported for now
+    service:
+      type: NodePort
+      overrides: {}
+
+  validation: {}
+
+  # Patching of generated service or deployment by Spinnaker service.
+  # Like in Kustomize, several patch types are supported. See
+  # https://github.com/armory/spinnaker-operator/blob/master/doc/options.md#speckustomize
+  kustomize:
+    deck:
+      service:
+        patchesJson6902: |
+          - op: replace
+            path: /spec/ports/0/nodePort
+            value: 32070
+    gate:
+      service:
+        patchesJson6902: |
+          - op: replace
+            path: /spec/ports/0/nodePort
+            value: 32064
