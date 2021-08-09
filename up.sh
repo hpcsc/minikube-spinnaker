@@ -22,7 +22,7 @@ kubectl wait --for=condition=Available deployment --all -n spinnaker --timeout=3
 kubectl wait --for=condition=Available deployment --all -n spinnaker-operator --timeout=15m
 
 echo "=== create SpinnakerService"
-./expand-spinnaker-service-yml.sh | kubectl apply -f -
+./scripts/expand-spinnaker-service-yml.sh | kubectl apply -f -
 
 while [ "$(kubectl get spinnakerservice spinnaker -n spinnaker -o json | jq -r '.status.serviceCount // 0')" == "0" ]; do
     echo "=== operator has not picked up SpinnakerService CR yet"

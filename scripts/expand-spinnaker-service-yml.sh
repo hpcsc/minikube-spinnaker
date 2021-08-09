@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-KUBE_CONFIG=$(./export-kube-config.sh)
+KUBE_CONFIG=$(./scripts/export-kube-config.sh)
 MINIKUBE_IP=$(minikube ip)
 DECK_NODEPORT=32070
 GATE_NODEPORT=32064
