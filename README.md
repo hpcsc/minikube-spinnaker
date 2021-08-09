@@ -14,6 +14,8 @@ This setup uses:
 ## Run
 
 - Create Github personal access token: Go to https://github.com/settings/tokens, Generate new token with scope `repo`
-- Set environment variable `GITHUB_TOKEN` and run `./up.sh`
+- Install [direnv](https://direnv.net/)
+- `cp ./.envrc.template ./.envrc` and fill in `.envrc` with the github token above, run `direnv allow`. This will allow `direnv` to export `GITHUB_TOKEN` environment variable whenever you are in this directory.
+- Run `./up.sh`
 
 Once all deployments are ready, spinnaker is available at `http://minikube-ip:32070`
