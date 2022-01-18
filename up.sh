@@ -18,7 +18,7 @@ kubectl apply -f ./tmp/deploy/crds/
 kubectl -n spinnaker-operator apply -f ./tmp/deploy/operator/cluster
 
 echo "=== wait for minio and operator to be ready."
-kubectl wait --for=condition=Available deployment --all -n spinnaker --timeout=30s
+kubectl wait --for=condition=Available deployment --all -n spinnaker --timeout=5m
 kubectl wait --for=condition=Available deployment --all -n spinnaker-operator --timeout=15m
 
 echo "=== create SpinnakerService"
