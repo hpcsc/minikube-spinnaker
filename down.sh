@@ -1,10 +1,12 @@
 #!/bin/bash
 
+CONTEXT=${1:-minikube}
+
 remaining_pods() {
-    kubectl get pods -n spinnaker -l app.kubernetes.io/part-of=spinnaker -o json | jq -r '.items | length'
+    kubectl get pods --context=${CONTEXT} -n spinnaker -l app.kubernetes.io/part-of=spinnaker -o json | jq -r '.items | length'
 }
 
-kubectl delete spinnakerservice spinnaker -n spinnaker
+kubectl delete spinnakerservice spinnaker -n spinnaker --context=${CONTEXT}
 
 remaining=$(remaining_pods)
 while [ ${remaining} -gt 0 ]; do
@@ -13,9 +15,9 @@ while [ ${remaining} -gt 0 ]; do
     remaining=$(remaining_pods)
 done
 
-kubectl delete -f ./initial-setup.yaml
+kubectl delete --context=${CONTEXT} -f ./initial-setup.yaml
 
 if [ -d ./tmp/deploy ]; then
-    kubectl delete -f ./tmp/deploy/crds/
-    kubectl -n spinnaker-operator delete -f ./tmp/deploy/operator/cluster
+    kubectl delete --context=${CONTEXT} -f ./tmp/deploy/crds/
+    kubectl delete --context=${CONTEXT} -n spinnaker-operator -f ./tmp/deploy/operator/cluster
 fi
